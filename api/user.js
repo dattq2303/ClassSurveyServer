@@ -18,9 +18,9 @@ user.post('/login', (req, res) => {
             message['data'] = 'Internal Server Error';
             res.status(500).json(message);
         } else {
-            connection.query('select * from Users where userName = ?', email, 
+            connection.query('select * from Users where userName = ?',[email],
             (err, rows, fields) => {
-                console.log(rows.lenght, rows[0]);
+                console.log(rows, JSON.stringify(rows));
                 if(err){
                     message.error = true;
                     message['data'] = 'Error Occured!';
@@ -28,7 +28,7 @@ user.post('/login', (req, res) => {
                     console.log('fail!');
                 }
                 else{
-                    if(rows != 'undefined'){
+                    if(rows.length > 0){
                         console.log('succeed!');
                         if(rows[0].password == password){
                             token = jwt.sign(
@@ -56,7 +56,7 @@ user.post('/login', (req, res) => {
                     else{
                         message.error = 1;
                         message['data'] = 'Email does not exist!';
-                        res.status(204).json(message);
+                        res.status(400).json(message);
                         console.log('fail!');
                     }
                 }
