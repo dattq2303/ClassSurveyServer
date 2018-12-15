@@ -85,9 +85,6 @@ var upload = multer({ //multer settings
                 }
             }).single('file');
 
-lecturer.get('/a',function(req,res){
-    res.sendFile(__dirname + "/index.html");
-});
 
 lecturer.post('/upload', (req, res, next) => {
     var exceltojson;
