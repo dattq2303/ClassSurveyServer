@@ -83,7 +83,7 @@ var upload = multer({ //multer settings
                 }
             }).single('file');
 
-student.post('/upload', (req, res, next) => {
+student.post('/create', (req, res, next) => {
     var exceltojson;
         upload(req,res,function(err){
             if(err){
@@ -115,7 +115,7 @@ student.post('/upload', (req, res, next) => {
                     var values = [];
                     for(var i = 0; i < result.length; i++)
                         if (result[i].username != '')
-                            values.push([result[i].username, result[i].password, 'student']);
+                            values.push([result[i].username, result[i].password, result[i].code, result[i].content, result[i].vnumail, result[i].role, result[i].name]);
                         else break;
                     var message = {};
                     console.log(values)
@@ -127,7 +127,10 @@ student.post('/upload', (req, res, next) => {
                         }else{
                             var Id;
                             for (var i = 0; i < values.length; i++){
-                                let student = values[i];
+                                let account = values[i];
+                                var student = [];
+                                student.push(account[0], account[1], account[5])
+                                console.log(student)
                                 var sql = "INSERT INTO Users (userName, password, role) VALUES (?)"
                                 connection.query(sql,[student] ,(err, rows) => {
                                     console.log(rows.affectedRows);
@@ -138,8 +141,7 @@ student.post('/upload', (req, res, next) => {
                                     }else{
                                         Id = rows.insertId;
                                         var student1 = [];
-                                        student1.push(Id, 'student','abc','abc',16020055,'abc');
-                                        console.log(student1);
+                                        student1.push(Id, account[5], account[4], account[3], account[2], account[6])
                                         console.log(Id);
                                         var insert = "INSERT INTO Students (Id_Students, Role, Vnumail, Content, Code, Name) VALUES (?)"
                                         connection.query(insert,[student1] ,(err, row) => {
@@ -149,6 +151,8 @@ student.post('/upload', (req, res, next) => {
                                                 res.status(400).json(message);
                                             }else{
                                                 console.log(row.affectedRows);
+                                                message['data'] = 'UPDATE success!';
+                                                res.status(200).json(message);
                                             }
                                         });
                                         // message['error'] = false;
@@ -167,7 +171,7 @@ student.post('/upload', (req, res, next) => {
         })
 });
 
-student.put('/edit', (req, res, next) => {
+student.put('/', (req, res, next) => {
     var exceltojson;
         upload(req,res,function(err){
             if(err){
@@ -199,10 +203,10 @@ student.put('/edit', (req, res, next) => {
                     var values = [];
                     for(var i = 0; i < result.length; i++)
                         if (result[i].username != '')
-                            values.push([result[i].id, result[i].username, result[i].password, result[i].name, result[i].Vnumail, 'student']);
+                            values.push([result[i].id, result[i].username, result[i].password, result[i].name, result[i].vnumail, 'student']);
                         else break;
                     var message = {};
-                    console.log(values)
+                    // console.log(values)
                     database.connection.getConnection((err, connection) => {
                         if(err){
                             message['error'] = true;
@@ -213,6 +217,7 @@ student.put('/edit', (req, res, next) => {
                             for (var i = 0; i < values.length; i++){
                                 let student = values[i];
                                 var Id = student[0];
+                                console.log(student)
                                 var sql = "UPDATE Users SET userName = ?, password = ? where Id_Users = ?"
                                 connection.query(sql,[student[1], student[2], student[0]] ,(err, rows) => {
                                     console.log(rows.affectedRows);
@@ -221,19 +226,20 @@ student.put('/edit', (req, res, next) => {
                                         message['data'] = 'Error Ocured!';
                                         res.status(400).json(message);
                                     }else{
-                                        Id = rows.insertId;
                                         var student1 = [];
-                                        student1.push(Id, 'student','abc','abc',16020055,'abc');
+                                        student1.push(16020055, 'abc1','abc1','student', 'abc1', Id);
                                         console.log(student1);
                                         console.log(Id);
-                                        var edit = "UPDATE Students SET Code = ?, Co VALUES (?)"
-                                        connection.query(insert,[student1] ,(err, row) => {
-                                            console.log(Id, '1');
+                                        var edit = "UPDATE Students SET Code = ?, Content = ?, Vnumail = ?, Role = ?, Name = ? where Students.Id_Students = ?"
+                                        connection.query(edit,[student1[0], student1[1], student1[2], student1[3], student1[4], student1[5]] ,(err, row) => {
+                                            console.log(Id, row);
                                             if(err) {
                                                 message['error'] = true;
                                                 res.status(400).json(message);
                                             }else{
                                                 console.log(row.affectedRows);
+                                                message['data'] = 'UPDATE success!';
+                                                res.status(200).json(message);
                                             }
                                         });
                                         // message['error'] = false;
@@ -252,7 +258,7 @@ student.put('/edit', (req, res, next) => {
         })
 });
 
-student.delete('/delete/:studentId', (req, res, next) => {
+student.delete('/:studentId', (req, res, next) => {
     var Id = req.params.studentId;
     var message = {};
     database.connection.getConnection((err, connection) => {
@@ -265,6 +271,26 @@ student.delete('/delete/:studentId', (req, res, next) => {
             connection.query(sql,[Id] ,function (err, result) {
                 if (err) throw err;
                 console.log("Number of records deleted: " + result.affectedRows);
+                var deleteUser = "DELETE FROM Users WHERE Id_Users = ?";
+                connection.query(deleteUser, [Id], (err, result1) => {
+                    if(err){
+                        message['error'] = true;
+                        res.status(400).json(message);
+                    }else{
+                        var alter = "ALTER TABLE Users AUTO_INCREMENT = ?";
+                        connection.query(alter, [Number(Id)], (err, row) => {
+                            if(err) {
+                                message['error'] = "id reset err";
+                                res.status(400).json(message);
+                            }else{
+                                console.log("reset Id success");
+                            }
+                        });
+                        console.log(result1,"delete user success");
+                    }
+                });
+                message['data'] = "delete user success";
+                res.status(200).json(message);
             });
             connection.release();
         }
