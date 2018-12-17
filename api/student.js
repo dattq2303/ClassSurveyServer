@@ -123,7 +123,7 @@ student.post('/create', (req, res, next) => {
                         if(err){
                             message['error'] = true;
                             message['data'] = 'Internal Server Error';
-                            res.status(500).json(message);
+                            return res.status(500).json(message);
                         }else{
                             var Id;
                             for (var i = 0; i < values.length; i++){
@@ -137,7 +137,7 @@ student.post('/create', (req, res, next) => {
                                     if (err) {
                                         message['error'] = true;
                                         message['data'] = 'Insert users fail!';
-                                        res.status(400).json(message);
+                                        return res.status(400).json(message);
                                     }else{
                                         Id = rows.insertId;
                                         var student1 = [];
@@ -149,7 +149,7 @@ student.post('/create', (req, res, next) => {
                                             if(err) {
                                                 message['error'] = true;
                                                 message['data'] = 'Insert students fail!'
-                                                res.status(400).json(message);
+                                                return res.status(400).json(message);
                                             }else{
                                                 console.log("Insert students success!");
                                             }
@@ -206,7 +206,7 @@ student.put('/', (req, res, next) => {
                         if(err){
                             message['error'] = true;
                             message['data'] = 'Internal Server Error';
-                            res.status(500).json(message);
+                            return res.status(500).json(message);
                         }else{
                             var Id;
                             for (var i = 0; i < values.length; i++){
@@ -220,7 +220,7 @@ student.put('/', (req, res, next) => {
                                     if (err) {
                                         message['error'] = true;
                                         message['data'] = 'Update user fail!';
-                                        res.status(400).json(message);
+                                        return res.status(400).json(message);
                                     }else{
                                         var student1 = [];
                                         student1.push(account[3], account[5],account[4],account[6], account[7], account[0]);
@@ -231,7 +231,7 @@ student.put('/', (req, res, next) => {
                                             if(err) {
                                                 message['error'] =true;
                                                 message['data'] = 'Update student fail!';
-                                                res.status(400).json(message);
+                                                return res.status(400).json(message);
                                             }else{
                                                 console.log("Update student success!");
                                             }

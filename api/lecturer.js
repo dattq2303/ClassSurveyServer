@@ -113,8 +113,11 @@ lecturer.post('/create', (req, res, next) => {
                     } 
                     var values = [];
                     for(var i = 0; i < result.length; i++)
-                        if (result[i].username != '')
-                            values.push([result[i].username, result[i].password, result[i].phone, result[i].code, result[i].vnumail, result[i].role, result[i].name]);
+                        if (result[i].username != ''){
+                            var code = parseInt(Math.random().toString().slice(2,11));
+                            console.log(code);
+                            values.push([result[i].username, result[i].password, result[i].phone, code, result[i].vnumail, result[i].role, result[i].name]);
+                        }
                         else break;
                     var message = {};
                     console.log(values)
@@ -136,19 +139,19 @@ lecturer.post('/create', (req, res, next) => {
                                     if (err) {
                                         message['error'] = true;
                                         message['data'] = 'Insert users fail!';
-                                        res.status(400).json(message);
+                                        return res.status(400).json(message);
                                     }else{
                                         Id = rows.insertId;
                                         var lecturer1 = [];
-                                        lecturer1.push(Id, account[5], account[4], account[3], account[2], account[6])
+                                        lecturer1.push(Id, account[5], account[4], account[3], account[2], account[6]);
                                         console.log(Id);
-                                        var insert = "INSERT INTO Lecturers (Id_Lecturers, Role, Vnumail, Code, Phone, Name) VALUES (?)"
+                                        var insert = "INSERT INTO Lecturers (Id_Lecturers, Role, Vnumail, Code, Phone, Name) VALUES (?)";
                                         connection.query(insert,[lecturer1] ,(err, row) => {
                                             console.log(Id, '1');
                                             if(err) {
                                                 message['error'] = true;
-                                                message['data'] = 'Insert lecturers fail!'
-                                                res.status(400).json(message);
+                                                message['data'] = 'Insert lecturers fail!';
+                                                return res.status(400).json(message);
                                             }else{
                                                 console.log("Insert lecturers success!");
                                             }
@@ -219,7 +222,7 @@ lecturer.put('/', (req, res, next) => {
                                     if (err) {
                                         message['error'] = true;
                                         message['data'] = 'Update users fail!';
-                                        res.status(400).json(message);
+                                        return res.status(400).json(message);
                                     }else{
                                         var lecturer1 = [];
                                         lecturer1.push(account[3], account[5],account[4],account[6], account[7], account[0]);
@@ -230,7 +233,7 @@ lecturer.put('/', (req, res, next) => {
                                             if(err) {
                                                 message['error'] =true;
                                                 message['data'] = 'Update lecturers fail!';
-                                                res.status(400).json(message);
+                                                return res.status(400).json(message);
                                             }else{
                                                 console.log("Update lecturers success!");
                                             }
