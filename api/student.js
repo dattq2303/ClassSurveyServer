@@ -136,7 +136,7 @@ student.post('/create', (req, res, next) => {
                                     console.log(rows.affectedRows);
                                     if (err) {
                                         message['error'] = true;
-                                        message['data'] = 'Error Ocured!';
+                                        message['data'] = 'Insert users fail!';
                                         res.status(400).json(message);
                                     }else{
                                         Id = rows.insertId;
@@ -148,19 +148,18 @@ student.post('/create', (req, res, next) => {
                                             console.log(Id, '1');
                                             if(err) {
                                                 message['error'] = true;
+                                                message['data'] = 'Insert students fail!'
                                                 res.status(400).json(message);
                                             }else{
-                                                console.log(row.affectedRows);
-                                                message['data'] = 'UPDATE success!';
-                                                res.status(200).json(message);
+                                                console.log("Insert students success!");
                                             }
                                         });
-                                        // message['error'] = false;
-                                        // message['data'] = rows;
-                                        // res.status(200).json(message);
                                     }
                             });
                         }
+                            message['error'] = false;
+                            message['data'] = 'Insert students success!';
+                            res.status(200).json(message);
                             connection.release();
                         }
                     });
@@ -178,14 +177,10 @@ student.put('/', (req, res, next) => {
                  res.json({error_code:1,err_desc:err});
                  return;
             }
-            /** Multer gives us file info in req.file object */
             if(!req.file){
                 res.json({error_code:1,err_desc:"No file passed"});
                 return;
             }
-            /** Check the extension of the incoming file and 
-             *  use the appropriate module
-             */
             if(req.file.originalname.split('.')[req.file.originalname.split('.').length-1] === 'xlsx'){
                 exceltojson = xlsxtojson;
             } else {
@@ -203,7 +198,7 @@ student.put('/', (req, res, next) => {
                     var values = [];
                     for(var i = 0; i < result.length; i++)
                         if (result[i].username != '')
-                            values.push([result[i].id, result[i].username, result[i].password, result[i].name, result[i].vnumail, 'student']);
+                            values.push([result[i].id, result[i].username, result[i].password, result[i].code, result[i].vnumail, result[i].content, result[i].role, result[i].name]);
                         else break;
                     var message = {};
                     // console.log(values)
@@ -215,39 +210,38 @@ student.put('/', (req, res, next) => {
                         }else{
                             var Id;
                             for (var i = 0; i < values.length; i++){
-                                let student = values[i];
-                                var Id = student[0];
+                                let account = values[i];
+                                var student = [];
+                                student.push(account[0], account[1], account[2], account[6])
                                 console.log(student)
-                                var sql = "UPDATE Users SET userName = ?, password = ? where Id_Users = ?"
-                                connection.query(sql,[student[1], student[2], student[0]] ,(err, rows) => {
+                                var sql = "UPDATE Users SET userName = ?, password = ?, role = ? where Id_Users = ?"
+                                connection.query(sql,[student[1], student[2], student[3], student[0]] ,(err, rows) => {
                                     console.log(rows.affectedRows);
                                     if (err) {
                                         message['error'] = true;
-                                        message['data'] = 'Error Ocured!';
+                                        message['data'] = 'Update user fail!';
                                         res.status(400).json(message);
                                     }else{
                                         var student1 = [];
-                                        student1.push(16020055, 'abc1','abc1','student', 'abc1', Id);
+                                        student1.push(account[3], account[5],account[4],account[6], account[7], account[0]);
                                         console.log(student1);
-                                        console.log(Id);
                                         var edit = "UPDATE Students SET Code = ?, Content = ?, Vnumail = ?, Role = ?, Name = ? where Students.Id_Students = ?"
                                         connection.query(edit,[student1[0], student1[1], student1[2], student1[3], student1[4], student1[5]] ,(err, row) => {
                                             console.log(Id, row);
                                             if(err) {
-                                                message['error'] = true;
+                                                message['error'] =true;
+                                                message['data'] = 'Update student fail!';
                                                 res.status(400).json(message);
                                             }else{
-                                                console.log(row.affectedRows);
-                                                message['data'] = 'UPDATE success!';
-                                                res.status(200).json(message);
+                                                console.log("Update student success!");
                                             }
                                         });
-                                        // message['error'] = false;
-                                        // message['data'] = rows;
-                                        // res.status(200).json(message);
                                     }
                             });
                         }
+                            message['error'] = false;
+                            message['data'] = 'Update student success!';
+                            res.status(200).json(message);
                             connection.release();
                         }
                     });
@@ -277,20 +271,11 @@ student.delete('/:studentId', (req, res, next) => {
                         message['error'] = true;
                         res.status(400).json(message);
                     }else{
-                        var alter = "ALTER TABLE Users AUTO_INCREMENT = ?";
-                        connection.query(alter, [Number(Id)], (err, row) => {
-                            if(err) {
-                                message['error'] = "id reset err";
-                                res.status(400).json(message);
-                            }else{
-                                console.log("reset Id success");
-                            }
-                        });
-                        console.log(result1,"delete user success");
+                        console.log(result1,"delete student success");
+                        message['data'] = "delete student success";
+                        res.status(200).json(message);
                     }
                 });
-                message['data'] = "delete user success";
-                res.status(200).json(message);
             });
             connection.release();
         }
