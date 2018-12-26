@@ -41,7 +41,7 @@ student.get('/:studentId', (req, res, next) => {
             res.status(500).json(message);
         }else{
             // var sql = 'select c.Subject from classes from Classes C left join StudentClasses SC on C.Id = SC.ClassId where SC.studentId = ?' + connection.escape(Id)
-            connection.query('select c.Subject from Classes c left join StudentClasses SC on c.Id = SC.ClassId where SC.studentId = ?',[Id] ,(err, rows, feilds) => {
+            connection.query('select Course from Students where Id_Students = ?',[Id] ,(err, rows, feilds) => {
                 console.log(rows);
                 if (err) {
                     message['error'] = true;

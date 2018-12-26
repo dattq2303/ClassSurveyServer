@@ -41,7 +41,7 @@ lecturer.get('/:lecturerId', (req, res, next) => {
             message['data'] = 'Internal Server Error';
             res.status(500).json(message);
         }else{
-            connection.query('select c.Subject from Classes c join Lecturers L on c.LecturerId = L.Id_Lecturers where L.Id_Lecturers = ?',[Id] ,(err, rows, feilds) => {
+            connection.query('select c.name_subject from Classes c join Lecturers L on c.LectureId = L.Id_Lecturers where L.Id_Lecturers = ?',[Id] ,(err, rows, feilds) => {
                 console.log(rows);
                 if (err) {
                     message['error'] = true;
