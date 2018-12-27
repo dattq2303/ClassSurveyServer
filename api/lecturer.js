@@ -128,41 +128,76 @@ lecturer.post('/create', (req, res, next) => {
                             res.status(500).json(message);
                         }else{
                             var Id;
-                            for (var i = 0; i < values.length; i++){
-                                let account = values[i];
-                                var lecturer = [];
-                                lecturer.push(account[0], account[1], account[5])
-                                console.log(lecturer)
-                                var sql = "INSERT INTO Users (userName, password, role) VALUES (?)"
-                                connection.query(sql,[lecturer] ,(err, rows) => {
-                                    console.log(rows.affectedRows);
-                                    if (err) {
-                                        message['error'] = true;
-                                        message['data'] = 'Insert users fail!';
-                                        return res.status(400).json(message);
-                                    }else{
-                                        Id = rows.insertId;
-                                        var lecturer1 = [];
-                                        lecturer1.push(Id, account[5], account[4], account[3], account[2], account[6]);
-                                        console.log(Id);
-                                        var insert = "INSERT INTO Lecturers (Id_Lecturers, Role, Vnumail, Code, Phone, Name) VALUES (?)";
-                                        connection.query(insert,[lecturer1] ,(err, row) => {
-                                            console.log(Id, '1');
-                                            if(err) {
-                                                message['error'] = true;
-                                                message['data'] = 'Insert lecturers fail!';
-                                                return res.status(400).json(message);
-                                            }else{
-                                                console.log("Insert lecturers success!");
+                            var userNames = [];
+                            var checkSql = "SELECT userName from Users";
+                            connection.query(checkSql, (err, rowss) => {
+                                if(err){
+                                    message['error'] = true;
+                                    message['data'] = 'error occur!';
+                                    return res.status(400).json(message);
+                                }else{
+                                    console.log(rowss);
+                                    userNames = rowss;
+                                    for (var i = 0; i < values.length; i++){
+                                        let account = values[i];
+                                        var lecturer = [];
+                                        lecturer.push(account[0], account[1], account[5])
+                                        console.log(lecturer);
+                                        var checkIfExist = false;
+                                        console.log(userNames);
+                                        for(var j = 0; j < userNames.length; j++){
+                                            console.log(userNames[i].userName, lecturer[0])
+                                            if(userNames[j].userName == lecturer[0]){
+                                                    checkIfExist = true;
+                                                    break;
+                                                }else continue;
                                             }
-                                        });
+                                        console.log(checkIfExist);
+                                        if(checkIfExist == true){
+                                            console.log('UserName is already exist!');
+                                            break;
+                                        }else{
+                                            var sql = "INSERT INTO Users (userName, password, role) VALUES (?)"
+                                            connection.query(sql,[lecturer] ,(err, rows) => {
+                                                 console.log(rows.affectedRows);
+                                                if (err) {
+                                                    message['error'] = true;
+                                                    message['data'] = 'Insert users fail!';
+                                                    return res.status(400).json(message);
+                                                }else{
+                                                    Id = rows.insertId;
+                                                    var lecturer1 = [];
+                                                    lecturer1.push(Id, account[5], account[4], account[3], account[2], account[6]);
+                                                    console.log(Id);
+                                                    var insert = "INSERT INTO Lecturers (Id_Lecturers, Role, Vnumail, Code, Phone, Name) VALUES (?)";
+                                                    connection.query(insert,[lecturer1] ,(err, row) => {
+                                                        console.log(Id, '1');
+                                                        if(err) {
+                                                            message['error'] = true;
+                                                            message['data'] = 'Insert lecturers fail!';
+                                                            return res.status(400).json(message);
+                                                        }else{
+                                                            console.log("Insert lecturers success!");
+                                                        }
+                                                    });
+                                                }
+                                            });
+                                        }
+                                }
+                                    if(checkIfExist == false){
+                                        console.log(checkIfExist);
+                                        message['error'] = false;
+                                        message['data'] = 'Insert lecturers success!';
+                                        res.status(200).json(message);
+                                    }else{
+                                        message['error'] = true;
+                                        message['data'] = "UserName is already exist!";
+                                        res.status(400).json(message);
                                     }
+                                    connection.release();
+                                }
                             });
-                        }
-                            message['error'] = false;
-                            message['data'] = 'Insert lecturers success!';
-                            res.status(200).json(message);
-                            connection.release();
+
                         }
                     });
                 });
